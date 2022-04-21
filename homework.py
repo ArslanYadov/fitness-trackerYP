@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Callable, Dict
 
 
 @dataclass
@@ -26,6 +27,7 @@ class Training:
     CALORIE_COEFFICIENT_1: float = 18
     CALORIE_COEFFICIENT_2: float = 20
     MIN_IN_HOUR: int = 60
+    DURATION_MIN: float
 
     def __init__(self,
                  action: int,
@@ -60,10 +62,11 @@ class Training:
 class Running(Training):
     """Тренировка: бег."""
     def get_spent_calories(self) -> float:
-        return ((type(self).CALORIE_COEFFICIENT_1 * self.get_mean_speed()
-                - type(self).CALORIE_COEFFICIENT_2)
+        self.DURATION_MIN: float = self.duration * self.MIN_IN_HOUR
+        return ((self.CALORIE_COEFFICIENT_1 * self.get_mean_speed()
+                - self.CALORIE_COEFFICIENT_2)
                 * self.weight / self.M_IN_KM
-                * (self.duration * type(self).MIN_IN_HOUR))
+                * self.DURATION_MIN)
 
 
 class SportsWalking(Training):
@@ -81,15 +84,18 @@ class SportsWalking(Training):
         self.height = height
 
     def get_spent_calories(self) -> float:
+        self.DURATION_MIN: float = self.duration * self.MIN_IN_HOUR
         return ((self.CALORIE_COEFFICIENT_1 * self.weight
                 + (self.get_mean_speed()**self.SQUARE // self.height)
                 * self.CALORIE_COEFFICIENT_2 * self.weight)
-                * (self.duration * self.MIN_IN_HOUR))
+                * self.DURATION_MIN)
 
 
 class Swimming(Training):
     """Тренировка: плавание."""
     LEN_STEP: float = 1.38
+    CALORIE_COEFFICIENT_1: float = 1.1
+    CALORIE_COEFFICIENT_2: float = 2
 
     def __init__(self,
                  action: int,
@@ -107,16 +113,13 @@ class Swimming(Training):
             / self.M_IN_KM / self.duration)
 
     def get_spent_calories(self) -> float:
-        coeff_calories_1 = 1.1
-        coeff_calories_2 = 2
-
-        return ((self.get_mean_speed() + coeff_calories_1)
-                * coeff_calories_2 * self.weight)
+        return ((self.get_mean_speed() + self.CALORIE_COEFFICIENT_1)
+                * self.CALORIE_COEFFICIENT_2 * self.weight)
 
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    dict_from_param = {
+    dict_from_param: Dict[str, Callable[..., Training]] = {
         'SWM': Swimming,
         'RUN': Running,
         'WLK': SportsWalking
