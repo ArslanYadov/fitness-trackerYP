@@ -1,5 +1,8 @@
 from dataclasses import dataclass
+<<<<<<< HEAD
 from typing import Callable, Dict
+=======
+>>>>>>> ea89dd8636c2c3d193265468da9911b628f8cd18
 
 
 @dataclass
@@ -27,7 +30,10 @@ class Training:
     CALORIE_COEFFICIENT_1: float = 18
     CALORIE_COEFFICIENT_2: float = 20
     MIN_IN_HOUR: int = 60
+<<<<<<< HEAD
     DURATION_MIN: float
+=======
+>>>>>>> ea89dd8636c2c3d193265468da9911b628f8cd18
 
     def __init__(self,
                  action: int,
@@ -62,11 +68,18 @@ class Training:
 class Running(Training):
     """Тренировка: бег."""
     def get_spent_calories(self) -> float:
+<<<<<<< HEAD
         self.DURATION_MIN: float = self.duration * self.MIN_IN_HOUR
         return ((self.CALORIE_COEFFICIENT_1 * self.get_mean_speed()
                 - self.CALORIE_COEFFICIENT_2)
                 * self.weight / self.M_IN_KM
                 * self.DURATION_MIN)
+=======
+        return ((type(self).CALORIE_COEFFICIENT_1 * self.get_mean_speed()
+                - type(self).CALORIE_COEFFICIENT_2)
+                * self.weight / self.M_IN_KM
+                * (self.duration * type(self).MIN_IN_HOUR))
+>>>>>>> ea89dd8636c2c3d193265468da9911b628f8cd18
 
 
 class SportsWalking(Training):
@@ -84,18 +97,28 @@ class SportsWalking(Training):
         self.height = height
 
     def get_spent_calories(self) -> float:
+<<<<<<< HEAD
         self.DURATION_MIN: float = self.duration * self.MIN_IN_HOUR
         return ((self.CALORIE_COEFFICIENT_1 * self.weight
                 + (self.get_mean_speed()**self.SQUARE // self.height)
                 * self.CALORIE_COEFFICIENT_2 * self.weight)
                 * self.DURATION_MIN)
+=======
+        return ((self.CALORIE_COEFFICIENT_1 * self.weight
+                + (self.get_mean_speed()**self.SQUARE // self.height)
+                * self.CALORIE_COEFFICIENT_2 * self.weight)
+                * (self.duration * self.MIN_IN_HOUR))
+>>>>>>> ea89dd8636c2c3d193265468da9911b628f8cd18
 
 
 class Swimming(Training):
     """Тренировка: плавание."""
     LEN_STEP: float = 1.38
+<<<<<<< HEAD
     CALORIE_COEFFICIENT_1: float = 1.1
     CALORIE_COEFFICIENT_2: float = 2
+=======
+>>>>>>> ea89dd8636c2c3d193265468da9911b628f8cd18
 
     def __init__(self,
                  action: int,
@@ -119,7 +142,11 @@ class Swimming(Training):
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
+<<<<<<< HEAD
     dict_from_param: Dict[str, Callable[..., Training]] = {
+=======
+    dict_from_param = {
+>>>>>>> ea89dd8636c2c3d193265468da9911b628f8cd18
         'SWM': Swimming,
         'RUN': Running,
         'WLK': SportsWalking
