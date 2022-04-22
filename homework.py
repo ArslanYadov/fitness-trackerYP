@@ -70,14 +70,14 @@ class Training:
 
 class Running(Training):
     """Тренировка: бег."""
-    RUNNING_MULT_COEFF_1: float = 18
-    RUNNING_MULT_COEFF_2: float = 20
+    RUNNING_MULT_COEFF_LOW: float = 18
+    RUNNING_MULT_COEFF_HIGH: float = 20
 
     def get_spent_calories(self) -> float:
         return (
             (
-                self.RUNNING_MULT_COEFF_1 * self.get_mean_speed()
-                - self.RUNNING_MULT_COEFF_2
+                self.RUNNING_MULT_COEFF_LOW * self.get_mean_speed()
+                - self.RUNNING_MULT_COEFF_HIGH
             )
             * self.weight / self.M_IN_KM
             * self.duration_min()
@@ -90,8 +90,8 @@ class SportsWalking(Training):
     duration: float
     weight: float
     height: float
-    SPORTS_WALKING_MULT_COEFF_1: float = 0.035
-    SPORTS_WALKING_MULT_COEFF_2: float = 0.029
+    SPORTS_WALKING_MULT_COEFF_HIGH: float = 0.035
+    SPORTS_WALKING_MULT_COEFF_LOW: float = 0.029
     SQUARE: float = 2
 
     def __init__(
@@ -107,9 +107,9 @@ class SportsWalking(Training):
     def get_spent_calories(self) -> float:
         return (
             (
-                self.SPORTS_WALKING_MULT_COEFF_1 * self.weight
+                self.SPORTS_WALKING_MULT_COEFF_HIGH * self.weight
                 + (self.get_mean_speed()**self.SQUARE // self.height)
-                * self.SPORTS_WALKING_MULT_COEFF_2 * self.weight
+                * self.SPORTS_WALKING_MULT_COEFF_LOW * self.weight
             )
             * self.duration_min()
         )
@@ -123,8 +123,8 @@ class Swimming(Training):
     length_pool: float
     count_pool: float
     LEN_STEP: float = 1.38
-    SWIMMING_MULT_COEFF_1: float = 1.1
-    SWIMMING_MULT_COEFF_2: float = 2
+    SWIMMING_MULT_COEFF_LOW: float = 1.1
+    SWIMMING_MULT_COEFF_HIGH: float = 2
 
     def __init__(
         self,
@@ -146,39 +146,34 @@ class Swimming(Training):
 
     def get_spent_calories(self) -> float:
         return (
-            (self.get_mean_speed() + self.SWIMMING_MULT_COEFF_1)
-            * self.SWIMMING_MULT_COEFF_2 * self.weight
+            (self.get_mean_speed() + self.SWIMMING_MULT_COEFF_LOW)
+            * self.SWIMMING_MULT_COEFF_HIGH * self.weight
         )
 
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    dict_from_param: Dict[str, Type[Training]] = {
+    DICT_FROM_PARAM: Dict[str, Type[Training]] = {
         'SWM': Swimming,
         'RUN': Running,
         'WLK': SportsWalking
     }
 
-    if workout_type not in dict_from_param:
-        try:
-            return Training(*data)
-        except TypeError:
-            print(f'Type error in {Training.__name__}')
+    if workout_type not in DICT_FROM_PARAM:
+        raise KeyError(
+            f'Entered training type: {workout_type}, '
+            f'Procceed only: {", ".join(DICT_FROM_PARAM)}.'
+        )
     try:
-        return dict_from_param[workout_type](*data)
-    except KeyError:
-        print(f'Invalid training type: {workout_type}')
+        return DICT_FROM_PARAM[workout_type](*data)
     except TypeError:
-        print(f'Type error in {dict_from_param[workout_type].__name__}')
+        raise TypeError('Diffrent amount of attribute')
 
 
 def main(training: Training) -> None:
     """Главная функция."""
-    try:
-        info = training.show_training_info()
-        print(info.get_message())
-    except AttributeError:
-        print('Error in reading package')
+    info = training.show_training_info()
+    print(info.get_message())
 
 
 if __name__ == '__main__':
