@@ -1,5 +1,6 @@
+import inspect
 from dataclasses import dataclass, asdict
-from typing import Dict, Type
+from typing import Dict, List, Type
 
 
 @dataclass
@@ -74,6 +75,7 @@ class Running(Training):
     RUNNING_MULT_COEFF_HIGH: float = 20
 
     def get_spent_calories(self) -> float:
+        """Получить кол-во потраченных калорий во время бега"""
         return (
             (
                 self.RUNNING_MULT_COEFF_LOW * self.get_mean_speed()
@@ -90,6 +92,7 @@ class SportsWalking(Training):
     duration: float
     weight: float
     height: float
+
     SPORTS_WALKING_MULT_COEFF_HIGH: float = 0.035
     SPORTS_WALKING_MULT_COEFF_LOW: float = 0.029
     SQUARE: float = 2
@@ -105,6 +108,7 @@ class SportsWalking(Training):
         self.height = height
 
     def get_spent_calories(self) -> float:
+        """Получить кол-во потраченных калорий во время спортивной ходьбы"""
         return (
             (
                 self.SPORTS_WALKING_MULT_COEFF_HIGH * self.weight
@@ -122,6 +126,7 @@ class Swimming(Training):
     weight: float
     length_pool: float
     count_pool: float
+
     LEN_STEP: float = 1.38
     SWIMMING_MULT_COEFF_LOW: float = 1.1
     SWIMMING_MULT_COEFF_HIGH: float = 2
@@ -139,16 +144,36 @@ class Swimming(Training):
         self.count_pool = count_pool
 
     def get_mean_speed(self) -> float:
+        """Получить среднюю скоросость во время плавания"""
         return (
             self.length_pool * self.count_pool
             / self.M_IN_KM / self.duration
         )
 
     def get_spent_calories(self) -> float:
+        """Получить кол-во потраченных калорий во время плавания"""
         return (
             (self.get_mean_speed() + self.SWIMMING_MULT_COEFF_LOW)
             * self.SWIMMING_MULT_COEFF_HIGH * self.weight
         )
+
+
+def get_inspect(training: Type[Training], data: list):
+    """Проверка количества аргументов"""
+    training_signature: inspect.Signature = inspect.signature(training)
+    training_signature_list: List[str] = list(training_signature.parameters)
+
+    length_training_arg = len(training_signature_list)
+    length_from_input = len(data)
+
+    ARGUMENTS_INFO_FORMAT = (
+        f'Allowed number of argument: {length_training_arg}; '
+        f'Received number of argument: {length_from_input}; '
+        f'Allowed arguments: {training_signature_list}'
+    )
+
+    if len(data) != length_training_arg:
+        raise TypeError(ARGUMENTS_INFO_FORMAT)
 
 
 def read_package(workout_type: str, data: list) -> Training:
@@ -159,21 +184,20 @@ def read_package(workout_type: str, data: list) -> Training:
         'WLK': SportsWalking
     }
 
+    acceptable_workout_type: str = ", ".join(DICT_FROM_PARAM)
+
     if workout_type not in DICT_FROM_PARAM:
         raise KeyError(
             f'Entered training type: {workout_type}, '
-            f'Procceed only: {", ".join(DICT_FROM_PARAM)}.'
+            f'Procceed only: {acceptable_workout_type}.'
         )
-    try:
-        return DICT_FROM_PARAM[workout_type](*data)
-    except TypeError:
-        raise TypeError('Diffrent amount of attribute')
+    get_inspect(DICT_FROM_PARAM[workout_type], data)
+    return DICT_FROM_PARAM[workout_type](*data)
 
 
 def main(training: Training) -> None:
     """Главная функция."""
-    info = training.show_training_info()
-    print(info.get_message())
+    print(training.show_training_info().get_message())
 
 
 if __name__ == '__main__':
